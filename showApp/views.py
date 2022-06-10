@@ -18,13 +18,17 @@ def storeAndAnalyze(request):
     body = json.loads(body_unicode)
     content = body['data']
     showsByGen = {}
+    showsAdded = {}
     for schedule in content:
         show = schedule["_embedded"]["show"]
         for gen in show["genres"]:
-            if gen in showsByGen:
+            if not gen in showsByGen:
+                showsByGen[gen] = []
+                showsAdded[gen] = {}
+            if not show["id"] in showsAdded[gen]:
+                showsAdded[gen][show["id"]] = True
                 showsByGen[gen].append(show)
-            else:
-                showsByGen[gen] = [show]
+                              
         showsCollection.insert_one(show)
     
     return JsonResponse(json.loads(dumps(showsByGen)))
